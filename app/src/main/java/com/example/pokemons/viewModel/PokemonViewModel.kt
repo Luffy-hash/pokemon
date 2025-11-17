@@ -17,6 +17,9 @@ class PokemonViewModel : ViewModel()
     var pokemonList by mutableStateOf<List<PokemonBasic>>(emptyList())
         private set
 
+    var filteredPokemonList by mutableStateOf<List<PokemonBasic>>(emptyList())
+        private set
+
     var selectedPokemon by mutableStateOf<Pokemon?>(null)
         private set
 
@@ -24,6 +27,12 @@ class PokemonViewModel : ViewModel()
         private set
 
     var error by mutableStateOf<String?>(null)
+        private set
+
+    var searchQuery by mutableStateOf("")
+        private set
+
+    var currentScreen by mutableStateOf("home")
         private set
 
     init {
@@ -35,7 +44,8 @@ class PokemonViewModel : ViewModel()
             isLoading = true
             error = null
             try {
-                pokemonList = repo.getPokemonList(50)
+                pokemonList = repo.getPokemonList(150)
+                filteredPokemonList = pokemonList
             } catch (e: Exception) {
                 error = "Erreur: ${e.message}"
             } finally {
@@ -56,6 +66,20 @@ class PokemonViewModel : ViewModel()
                 isLoading = false
             }
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        searchQuery = query
+        filteredPokemonList = if (query.isEmpty()) {
+            pokemonList
+        } else {
+            pokemonList.filter { it.name.contains(query, ignoreCase = true) }
+        }
+    }
+
+    fun navigateTo(screen: String) {
+        currentScreen = screen
+        selectedPokemon = null
     }
 
     fun clearSelection() {
